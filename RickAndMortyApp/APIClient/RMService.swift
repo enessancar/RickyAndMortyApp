@@ -10,7 +10,7 @@ import Foundation
 final class RMService {
     static let shared = RMService()
     
-    private init() {}
+    private init () {}
     
     public func getRequest(_ request: RMRequest, completion: @escaping() -> Void) {
         
