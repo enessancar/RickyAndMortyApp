@@ -14,8 +14,10 @@ final class RMRequest {
     }
     
     private let endpoint: RMEndpoint
-    private let pathComponents: Set<String>
+    private let pathComponents: [String]
     private let queryParametres: [URLQueryItem]
+    
+    public let httpMethod = "GET"
     
     private var urlString: String {
         var string = Constants.baseUrl
@@ -45,15 +47,56 @@ final class RMRequest {
         return URL(string: urlString)
     }
     
-    public let httpMethod = "GET"
-    
     public init(
         endpoint: RMEndpoint,
-        pathComponents: Set<String> = [],
+        pathComponents: [String] = [],
         queryParametres: [URLQueryItem] = []
     ) {
         self.endpoint = endpoint
         self.pathComponents = pathComponents
         self.queryParametres = queryParametres
     }
+    
+    convenience init?(url: URL) {
+        let string = url.absoluteString
+        if !string.contains(Constants.baseUrl) {
+            return nil
+        }
+        let trimmed = string.replacingOccurrences(of: Constants.baseUrl+"/", with: "")
+        if trimmed.contains("/") {
+            let components = trimmed.components(separatedBy: "/")
+            if !components.isEmpty {
+                let endpointString = components[0]
+                if let rmEndpoint = RMEndpoint(rawValue: endpointString) {
+                    self.init(endpoint: rmEndpoint)
+                    return
+                }
+            }
+            
+        } else if trimmed.contains("?") {
+            let components = trimmed.components(separatedBy: "?")
+            if !components.isEmpty, components.count > 2 {
+                let endPointString = components[0]
+                let queryItemsString = components[1]
+                // value=name&value=name
+                let queryItems: [URLQueryItem] = queryItemsString.components(separatedBy: "&").compactMap({
+                    guard $0.contains("=") else {
+                        return nil
+                    }
+                    let parts = $0.components(separatedBy: "=")
+                    return URLQueryItem(name: parts[0],
+                                        value: parts[1])
+                })
+                if let rmEndpoint = RMEndpoint(rawValue: endPointString) {
+                    self.init(endpoint: rmEndpoint, queryParametres: queryItems)
+                    return
+                }
+            }
+        }
+        return nil
+    }
+}
+
+extension RMRequest {
+    static let listCharactersRequest = RMRequest(endpoint: .character)
 }
