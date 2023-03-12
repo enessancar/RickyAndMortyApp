@@ -46,12 +46,15 @@ final class RMCharacterListView: UIView {
         super.init(frame: frame)
         translatesAutoresizingMaskIntoConstraints = false
         addSubviews(collectionView, spinner)
+        
         viewModel.delegate = self
         addConstraints()
         
         spinner.startAnimating()
         viewModel.fetchCharacters()
         setUpCollectionView()
+        didLoadInitialCharacters()
+        
     }
     
     required init?(coder: NSCoder) {

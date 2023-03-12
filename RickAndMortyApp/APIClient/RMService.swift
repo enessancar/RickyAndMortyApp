@@ -32,11 +32,11 @@ final class RMService {
                 return
             }
             do {
-                let json = try JSONDecoder().decode(type.self, from: data)
-                completion(.success(json))
+                let result = try JSONDecoder().decode(type.self, from: data)
+                completion(.success(result))
             }
             catch {
-                completion(.failure(error))
+                print(String(describing: error))
             }
         }
         task.resume()
